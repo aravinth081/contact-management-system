@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="header-titles">
+        <h1>Contact Directory</h1>
+        <p>Manage, filter, and export your personal and professional network.</p>
+    </div>
+    <div class="header-actions">
+        <!-- View Toggle Buttons -->
+        <div class="view-toggle-grp">
+            <button class="toggle-btn active" id="viewGridBtn" aria-label="Grid View">
+                <i data-lucide="grid"></i>
+            </button>
+            <button class="toggle-btn" id="viewTableBtn" aria-label="Table View">
+                <i data-lucide="list"></i>
+            </button>
+        </div>
+        <!-- CSV Import -->
+        <button class="secondary-btn" id="importCsvBtn">
+            <i data-lucide="upload"></i>
+            <span>Import CSV</span>
+        </button>
+        <!-- CSV Export -->
+        <a href="/api/contacts/export-csv" class="secondary-btn">
+            <i data-lucide="download"></i>
+            <span>Export CSV</span>
+        </a>
+        <!-- PDF Export -->
+        <a href="/api/contacts/export-pdf" class="secondary-btn">
+            <i data-lucide="file-text"></i>
+            <span>PDF Report</span>
+        </a>
+        <!-- Quick Add Contact -->
+        <button class="primary-btn" id="quickAddBtn">
+            <i data-lucide="plus"></i>
+            <span>Add Contact</span>
+        </button>
+        <!-- Add Contact -->
+        <button class="primary-btn" id="addContactBtn">
+            <i data-lucide="plus"></i>
+            <span>New Contact</span>
+        </button>
+    </div>
+</div>
+
+<!-- Filters Panel -->
+<div class="filters-panel">
+    <div class="filter-search-box">
+        <i data-lucide="search"></i>
+        <input type="text" placeholder="Search by name, phone, email, company..." id="contactsSearchInput">
+    </div>
+    
+    <div class="filters-row">
+        <!-- Category Filter -->
+        <div class="filter-group">
+            <label for="filterCategory">Category</label>
+            <select id="filterCategory">
+                <option value="">All Categories</option>
+                <option value="Personal">Personal</option>
+                <option value="Family">Family</option>
+                <option value="Friends">Friends</option>
+                <option value="Work">Work</option>
+                <option value="Clients">Clients</option>
+                <option value="Business">Business</option>
+                <option value="Emergency">Emergency</option>
+            </select>
+        </div>
+
+        <!-- Favorite Filter Toggle -->
+        <div class="filter-group-chip">
+            <button class="filter-chip-btn" id="filterFavoritesBtn">
+                <i data-lucide="star"></i>
+                <span>Favorites Only</span>
+            </button>
+        </div>
+
+        <!-- Emergency Filter Toggle -->
+        <div class="filter-group-chip">
+            <button class="filter-chip-btn" id="filterEmergencyBtn">
+                <i data-lucide="shield-alert"></i>
+                <span>Emergency Only</span>
+            </button>
+        </div>
+
+        <!-- Birthday Month -->
+        <div class="filter-group">
+            <label for="filterBirthdayMonth">Birthday Month</label>
+            <select id="filterBirthdayMonth">
+                <option value="">Any Month</option>
+                <option value="01">January</option>
+                <option value="02">February</option>
+                <option value="03">March</option>
+                <option value="04">April</option>
+                <option value="05">May</option>
+                <option value="06">June</option>
+                <option value="07">July</option>
+                <option value="08">August</option>
+                <option value="09">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+        </div>
+        
+        <button class="clear-filters-btn" id="clearFiltersBtn" style="display: none;">
+            <i data-lucide="rotate-ccw"></i>
+            <span>Clear Filters</span>
+        </button>
+    </div>
+</div>
+
+<!-- Contacts Container -->
+<div class="contacts-wrapper">
+    <!-- Grid Layout -->
+    <div class="contacts-grid active" id="contactsGrid">
+        <!-- Rendered dynamically -->
+        <div class="widget-empty-state">No contacts match the active criteria.</div>
+    </div>
+    
+    <!-- Table Layout -->
+    <div class="contacts-table-container" id="contactsTableContainer">
+        <table class="contacts-table" id="contactsTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Mobile</th>
+                    <th>Email</th>
+                    <th>Category</th>
+                    <th>Company</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="contactsTableBody">
+                <!-- Rendered dynamically -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ==========================================
+      SLIDE OVER DRAWER: CONTACT DETAILS
+=========================================== -->
+<div class="drawer-backdrop" id="contactDetailsDrawer">
+    <div class="drawer-panel">
+        <div class="drawer-header">
+            <h3>Contact details</h3>
+            <button class="drawer-close-btn" id="detailsDrawerCloseBtn"><i data-lucide="x"></i></button>
+        </div>
+        <div class="drawer-body" id="detailsDrawerBody">
+            <!-- Rendered dynamically -->
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+      MODAL: ADD / EDIT CONTACT FORM
+=========================================== -->
+<div class="modal-backdrop" id="contactFormModal">
+    <div class="modal-card modal-card-lg">
+        <div class="modal-header">
+            <h2 id="contactModalTitle">New Contact</h2>
+            <button class="modal-close-btn" id="contactModalCloseBtn"><i data-lucide="x"></i></button>
+        </div>
+        <form id="contactForm" class="modal-form" enctype="multipart/form-data">
+            <input type="hidden" id="cContactId" name="contactId">
+            
+            <div class="form-avatar-section">
+                <div class="avatar-preview-container">
+                    <img src="/static/images/default-avatar.svg" alt="Contact Photo" class="form-avatar-preview" id="formAvatarPreview">
+                    <label for="cPhoto" class="avatar-upload-overlay">
+                        <i data-lucide="camera"></i>
+                        <span>Upload</span>
+                    </label>
+                    <input type="file" id="cPhoto" name="photo" accept="image/*" style="display: none;">
+                </div>
+                <div class="avatar-upload-info">
+                    <span class="upload-title">Contact Photograph</span>
+                    <span class="upload-meta">Formats: PNG, JPG (Max 5MB)</span>
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label for="cFirstName">First Name *</label>
+                    <input type="text" id="cFirstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="cLastName">Last Name</label>
+                    <input type="text" id="cLastName" name="lastName">
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label for="cMobile">Mobile Number *</label>
+                    <input type="tel" id="cMobile" name="mobile" required>
+                </div>
+                <div class="form-group">
+                    <label for="cAlternateNumber">Alternate Number</label>
+                    <input type="tel" id="cAlternateNumber" name="alternateNumber">
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label for="cEmail">Email Address</label>
+                    <input type="email" id="cEmail" name="email">
+                </div>
+                <div class="form-group">
+                    <label for="cWebsite">Website</label>
+                    <input type="url" id="cWebsite" name="website" placeholder="https://example.com">
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label for="cCompany">Company</label>
+                    <input type="text" id="cCompany" name="company">
+                </div>
+                <div class="form-group">
+                    <label for="cDesignation">Designation</label>
+                    <input type="text" id="cDesignation" name="designation">
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label for="cBirthday">Birthday</label>
+                    <input type="date" id="cBirthday" name="birthday">
+                </div>
+                <div class="form-group">
+                    <label for="cCategory">Category *</label>
+                    <select id="cCategory" name="category" required>
+                        <option value="Personal">Personal</option>
+                        <option value="Family">Family</option>
+                        <option value="Friends">Friends</option>
+                        <option value="Work">Work</option>
+                        <option value="Clients">Clients</option>
+                        <option value="Business">Business</option>
+                        <option value="Emergency">Emergency</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="cAddress">Address</label>
+                <textarea id="cAddress" name="address" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="cNotes">Notes / Description</label>
+                <textarea id="cNotes" name="notes" rows="2"></textarea>
+            </div>
+
+            <div class="form-row-2 flex-checkboxes">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="cFavorite" name="favorite">
+                    <span class="checkmark"></span>
+                    <span class="label-text">Add to Favorites ⭐</span>
+                </label>
+                <label class="checkbox-container">
+                    <input type="checkbox" id="cEmergency" name="emergency">
+                    <span class="checkmark"></span>
+                    <span class="label-text">Mark as Emergency Contact 🚨</span>
+                </label>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="secondary-btn" id="contactModalCancelBtn">Cancel</button>
+                <button type="submit" class="primary-btn" id="contactModalSaveBtn">Save Contact</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==========================================
+      MODAL: CSV IMPORT MODAL
+=========================================== -->
+<div class="modal-backdrop" id="importCsvModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2>Import Bulk Contacts</h2>
+            <button class="modal-close-btn" id="csvModalCloseBtn"><i data-lucide="x"></i></button>
+        </div>
+        <form id="csvImportForm" class="modal-form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Download Template</label>
+                <p class="description-text">Download the required structure template to ensure matches occur correctly.</p>
+                <a href="/api/contacts/export-csv" class="download-template-link">
+                    <i data-lucide="download"></i>
+                    <span>Download sample format</span>
+                </a>
+            </div>
+            
+            <div class="form-group">
+                <label for="csvFile">Choose CSV File *</label>
+                <input type="file" id="csvFile" name="file" accept=".csv" required>
+            </div>
+            
+            <div id="csvValidationInfo" class="csv-validation-info" style="display: none;">
+                <!-- validation summary prints here -->
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="secondary-btn" id="csvModalCancelBtn">Cancel</button>
+                <button type="submit" class="primary-btn" id="csvImportSubmitBtn">Upload & Import</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==========================================
+      MODAL: DELETE CONFIRMATION
+=========================================== -->
+<div class="modal-backdrop" id="deleteConfirmModal">
+    <div class="modal-card">
+        <div class="modal-header header-danger">
+            <h2>Delete Contact</h2>
+            <button class="modal-close-btn" id="deleteModalCloseBtn"><i data-lucide="x"></i></button>
+        </div>
+        <div class="modal-body delete-modal-body">
+            <i data-lucide="trash-2" class="delete-icon"></i>
+            <h3>Are you absolutely sure?</h3>
+            <p>This action will permanently delete <b id="deleteContactName">this contact</b>. All records associated with this contact will be removed. This cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="secondary-btn" id="deleteModalCancelBtn">Cancel</button>
+            <button type="button" class="danger-btn" id="deleteModalConfirmBtn">Confirm Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.activePage = 'contacts';
+</script>
+{% endblock %}

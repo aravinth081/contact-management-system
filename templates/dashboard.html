@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="header-titles">
+        <h1>Workspace Dashboard</h1>
+        <p>Real-time analytics and updates for your contact network.</p>
+    </div>
+    <div class="header-actions">
+        <button class="secondary-btn" onclick="location.reload()">
+            <i data-lucide="refresh-cw"></i>
+            <span>Refresh Stats</span>
+        </button>
+    </div>
+</div>
+
+<!-- KPI Cards Grid -->
+<div class="stats-grid">
+    <!-- Card 1: Total Contacts -->
+    <div class="stats-card">
+        <div class="card-top">
+            <span class="card-label">Total Contacts</span>
+            <div class="card-icon icon-primary">
+                <i data-lucide="users"></i>
+            </div>
+        </div>
+        <div class="card-bottom">
+            <h2 class="card-value" id="kpiTotalContacts">0</h2>
+            <span class="card-trend text-muted">Active contacts in directory</span>
+        </div>
+    </div>
+    
+    <!-- Card 2: Favorites -->
+    <div class="stats-card">
+        <div class="card-top">
+            <span class="card-label">Favorites</span>
+            <div class="card-icon icon-warning">
+                <i data-lucide="star"></i>
+            </div>
+        </div>
+        <div class="card-bottom">
+            <h2 class="card-value" id="kpiFavorites">0</h2>
+            <span class="card-trend text-muted">Pinned for quick access</span>
+        </div>
+    </div>
+    
+    <!-- Card 3: Emergency Contacts -->
+    <div class="stats-card">
+        <div class="card-top">
+            <span class="card-label">Emergency Contacts</span>
+            <div class="card-icon icon-danger">
+                <i data-lucide="shield-alert"></i>
+            </div>
+        </div>
+        <div class="card-bottom">
+            <h2 class="card-value" id="kpiEmergency">0</h2>
+            <span class="card-trend text-muted">Marked priority responders</span>
+        </div>
+    </div>
+    
+
+
+</div>
+
+<!-- Charts Grid -->
+<div class="charts-grid">
+    <!-- Category Distribution -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3>Contacts by Category</h3>
+        </div>
+        <div class="chart-container" style="position: relative;">
+            <canvas id="categoryChart"></canvas>
+            <div id="categoryChartEmptyState" class="chart-empty-state" style="display: none; position: absolute; inset: 0; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+                 <i data-lucide="pie-chart" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 12px;"></i>
+                 <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">No Category Data</p>
+                 <p style="font-size: 12px; color: var(--text-muted);">Add contacts to view their category distribution.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Monthly Contact Growth -->
+    <div class="chart-card double-col">
+        <div class="chart-header">
+            <h3>Monthly Directory Growth</h3>
+        </div>
+        <div class="chart-container" style="position: relative;">
+            <canvas id="growthChart"></canvas>
+            <div id="growthChartEmptyState" class="chart-empty-state" style="display: none; position: absolute; inset: 0; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+                 <i data-lucide="trending-up" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 12px;"></i>
+                 <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">No Growth Analytics</p>
+                 <p style="font-size: 12px; color: var(--text-muted);">Add contacts to track your directory growth over time.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Widgets Bottom Row -->
+<div class="widgets-grid">
+    
+    <!-- Recent Contacts -->
+    <div class="widget-card">
+        <div class="widget-header">
+            <h3>Recent Contacts</h3>
+            <a href="{{ url_for('contacts_page') }}" class="view-all-link">View Directory</a>
+        </div>
+        <div class="widget-body">
+            <div class="recent-list" id="recentContactsList">
+                <div class="widget-empty-state">No contacts added yet.</div>
+            </div>
+        </div>
+    </div>
+    
+
+    
+    
+    <!-- Recent Activities Widget -->
+    <div class="widget-card">
+        <div class="widget-header">
+            <h3>Recent Activities</h3>
+        </div>
+        <div class="widget-body">
+            <div class="activity-feed" id="activityFeed">
+                <div class="widget-empty-state">No recent activities.</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Pass current page to JS -->
+<script>
+    window.activePage = 'dashboard';
+</script>
+{% endblock %}

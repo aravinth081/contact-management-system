@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - ContactPro CRM</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <script>
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+</head>
+<body class="auth-body">
+    
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header" style="margin-bottom: 24px;">
+                <img src="/static/images/logo.png" alt="Contact Management System" style="height: 52px; max-width: 240px; object-fit: contain; margin-bottom: 8px;">
+                <p id="authSubtitle">Create your CRM account</p>
+            </div>
+            
+            <div class="auth-tabs" id="authTabs">
+                <button class="auth-tab-btn" onclick="location.href='/login'">Sign In</button>
+                <button class="auth-tab-btn active" onclick="switchAuthMode('register')">Register</button>
+            </div>
+            
+            <div id="authAlert" class="auth-alert" style="display: none;"></div>
+
+            <!-- Registration Form (Active on register page) -->
+            <form id="registerForm" class="auth-form active">
+                <div class="form-group">
+                    <label for="regName">Full Name</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="user"></i>
+                        <input type="text" id="regName" placeholder="John Doe" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="regEmail">Email Address</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="mail"></i>
+                        <input type="email" id="regEmail" placeholder="name@company.com" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="regPassword">Password</label>
+                        <div class="input-with-icon">
+                            <i data-lucide="lock"></i>
+                            <input type="password" id="regPassword" placeholder="Min. 8 characters" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group flex-1">
+                        <label for="regConfirmPassword">Confirm Password</label>
+                        <div class="input-with-icon">
+                            <i data-lucide="shield-alert"></i>
+                            <input type="password" id="regConfirmPassword" placeholder="Re-enter password" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="primary-btn-full" id="registerBtn">
+                    <span>Create Account</span>
+                    <i data-lucide="arrow-right"></i>
+                </button>
+            </form>
+
+        </div>
+    <!-- Fullscreen Premium Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner-wrap">
+                <div class="glowing-spinner"></div>
+                <i data-lucide="shield-check" class="loading-icon"></i>
+            </div>
+            <h3 id="loadingText">Verifying credentials...</h3>
+            <p class="loading-subtext">Connecting to secure database</p>
+        </div>
+    </div>
+
+    <!-- Firebase Client SDK (If Firebase Enabled) -->
+    {% if firebase_enabled %}
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script>
+        window.firebaseEnabled = true;
+    </script>
+    {% else %}
+    <script>
+        window.firebaseEnabled = false;
+    </script>
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

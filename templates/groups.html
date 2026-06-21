@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="header-titles">
+        <h1>Contact Groups</h1>
+        <p>Organize your connections into workspaces like Office, Clients, Family, or Friends.</p>
+    </div>
+    <div class="header-actions">
+        <button class="primary-btn" id="createGroupBtn">
+            <i data-lucide="plus"></i>
+            <span>Create Group</span>
+        </button>
+    </div>
+</div>
+
+<!-- Groups Grid -->
+<div class="groups-grid" id="groupsGrid">
+    <!-- Rendered dynamically -->
+    <div class="widget-empty-state">No contact groups created yet. Click 'Create Group' to get started!</div>
+</div>
+
+<!-- ==========================================
+      MODAL: CREATE / EDIT GROUP
+=========================================== -->
+<div class="modal-backdrop" id="groupModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2 id="groupModalTitle">Create Contact Group</h2>
+            <button class="modal-close-btn" id="groupModalCloseBtn"><i data-lucide="x"></i></button>
+        </div>
+        <form id="groupForm" class="modal-form">
+            <input type="hidden" id="gGroupId">
+            
+            <div class="form-group">
+                <label for="gGroupName">Group Name *</label>
+                <input type="text" id="gGroupName" placeholder="e.g., Office Team, Clients" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="gDescription">Description</label>
+                <textarea id="gDescription" placeholder="What is the purpose of this group?" rows="3"></textarea>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="secondary-btn" id="groupModalCancelBtn">Cancel</button>
+                <button type="submit" class="primary-btn" id="groupModalSaveBtn">Save Group</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==========================================
+      MODAL: ASSIGN CONTACTS TO GROUP
+=========================================== -->
+<div class="modal-backdrop" id="assignContactsModal">
+    <div class="modal-card modal-card-lg">
+        <div class="modal-header">
+            <div>
+                <h2 id="assignModalTitle">Assign Contacts</h2>
+                <p class="subtitle-desc" id="assignModalSubtitle">Group: Office Team</p>
+            </div>
+            <button class="modal-close-btn" id="assignModalCloseBtn"><i data-lucide="x"></i></button>
+        </div>
+        
+        <div class="assign-search-row">
+            <div class="search-box">
+                <i data-lucide="search"></i>
+                <input type="text" placeholder="Search contacts by name..." id="assignSearchInput">
+            </div>
+            <div class="assign-stats">
+                <span id="assignSelectedCount">0</span> selected
+            </div>
+        </div>
+
+        <form id="assignContactsForm" class="modal-form">
+            <input type="hidden" id="assignGroupId">
+            
+            <!-- Checklist Container -->
+            <div class="assign-checklist-wrapper">
+                <div class="assign-checklist" id="assignChecklist">
+                    <!-- Rendered dynamically -->
+                    <div class="widget-empty-state">No contacts available to assign. Please add contacts first.</div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="secondary-btn" id="assignModalCancelBtn">Cancel</button>
+                <button type="submit" class="primary-btn">Update Assignments</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==========================================
+      MODAL: DELETE GROUP CONFIRMATION
+=========================================== -->
+<div class="modal-backdrop" id="deleteGroupConfirmModal">
+    <div class="modal-card">
+        <div class="modal-header header-danger">
+            <h2>Delete Group</h2>
+            <button class="modal-close-btn" id="deleteGroupModalCloseBtn"><i data-lucide="x"></i></button>
+        </div>
+        <div class="modal-body delete-modal-body">
+            <i data-lucide="folder-minus" class="delete-icon"></i>
+            <h3>Delete this group?</h3>
+            <p>This action will permanently delete the group <b id="deleteGroupName">Office Team</b>. None of the assigned contacts will be deleted, they will simply lose their association with this group.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="secondary-btn" id="deleteGroupModalCancelBtn">Cancel</button>
+            <button type="button" class="danger-btn" id="deleteGroupModalConfirmBtn">Confirm Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.activePage = 'groups';
+</script>
+{% endblock %}

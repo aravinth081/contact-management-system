@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="header-titles">
+        <h1>Profile & Settings</h1>
+        <p>Manage your account credentials, workspace defaults, and custom label categories.</p>
+    </div>
+</div>
+
+<div class="profile-layout-grid">
+    <!-- Profile Edit Forms -->
+    <div class="profile-main-panel">
+        
+        <!-- Tab Headers -->
+        <div class="settings-tabs">
+            <button class="settings-tab active" data-tab="account">Account Profile</button>
+            <button class="settings-tab" data-tab="security">Security & Password</button>
+            <button class="settings-tab" data-tab="categories">Custom Categories</button>
+        </div>
+        
+        <!-- Tab Content: Account Profile -->
+        <div class="settings-tab-content active" id="tabContentAccount">
+            <form id="profileDetailsForm" class="settings-form" enctype="multipart/form-data">
+                <div class="profile-avatar-row">
+                    <div class="profile-avatar-wrapper">
+                        <img src="{{ user.photo or '/static/images/default-avatar.svg' }}" alt="Profile Photo" class="profile-avatar-img" id="profileAvatarImg">
+                        <label for="profilePhotoInput" class="avatar-edit-label">
+                            <i data-lucide="camera"></i>
+                            <span>Change Photo</span>
+                        </label>
+                        <input type="file" id="profilePhotoInput" name="photo" accept="image/*" style="display: none;">
+                    </div>
+                    <div class="profile-avatar-details">
+                        <h3>Your Profile Photo</h3>
+                        <p class="description-text">This image is visible across contacts assigned to you, email reports, and dashboards. Maximum size 5MB.</p>
+                    </div>
+                </div>
+                
+                <hr class="settings-divider">
+                
+                <div class="form-group">
+                    <label for="pFullName">Full Name *</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="user"></i>
+                        <input type="text" id="pFullName" name="fullName" value="{{ user.fullName }}" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pEmail">Email Address *</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="mail"></i>
+                        <input type="email" id="pEmail" name="email" value="{{ user.email }}" required>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="primary-btn" id="saveProfileBtn">
+                        <i data-lucide="save"></i>
+                        <span>Save Profile Changes</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Tab Content: Security -->
+        <div class="settings-tab-content" id="tabContentSecurity">
+            <form id="profileSecurityForm" class="settings-form">
+                <div class="form-group">
+                    <label for="pPassword">New Password</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="lock"></i>
+                        <input type="password" id="pPassword" placeholder="Enter new password (Min. 8 chars)">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pConfirmPassword">Confirm New Password</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="shield-alert"></i>
+                        <input type="password" id="pConfirmPassword" placeholder="Confirm your new password">
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="primary-btn" id="saveSecurityBtn">
+                        <i data-lucide="shield-check"></i>
+                        <span>Update Password</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Tab Content: Categories -->
+        <div class="settings-tab-content" id="tabContentCategories">
+            <div class="category-settings-container">
+                <div class="category-header">
+                    <h3>Manage Categories</h3>
+                    <p class="description-text">Add custom tags to categorize contacts in your CRM list. Standard defaults are highlighted below.</p>
+                </div>
+                
+                <div class="category-add-row">
+                    <input type="text" id="newCategoryInput" placeholder="Add custom tag (e.g., Contractors, Partners)">
+                    <button class="primary-btn" id="addCategoryBtn">
+                        <i data-lucide="plus"></i>
+                        <span>Add Category</span>
+                    </button>
+                </div>
+                
+                <div class="category-chips-list" id="categoryChipsList">
+                    <!-- Categories rendered dynamically -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    window.activePage = 'profile';
+</script>
+{% endblock %}
