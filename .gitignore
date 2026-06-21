@@ -111,3 +111,6 @@ Thumbs.db
 # IDE settings
 .vscode/
 .idea/
+
+# Firebase service account keys
+serviceAccountKey.json
