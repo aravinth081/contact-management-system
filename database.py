@@ -143,7 +143,7 @@ def get_user(user_id):
         return user_data
     return None
 
-def create_or_update_user(user_id, email, full_name, photo_url=None):
+def create_or_update_user(user_id, email, full_name, photo_url=None, password_hash=None):
     global FIRESTORE_WORKING
     user_data = {
         "userId": user_id,
@@ -152,6 +152,9 @@ def create_or_update_user(user_id, email, full_name, photo_url=None):
         "photo": photo_url or "/static/images/default-avatar.svg",
         "createdAt": datetime.datetime.now().isoformat()
     }
+    if password_hash:
+        user_data["passwordHash"] = password_hash
+
     if FIREBASE_ENABLED and db_client and FIRESTORE_WORKING:
         try:
             doc_ref = db_client.collection('users').document(user_id)
@@ -161,6 +164,8 @@ def create_or_update_user(user_id, email, full_name, photo_url=None):
                 user_data["createdAt"] = existing_data.get("createdAt", user_data["createdAt"])
                 if not photo_url:
                     user_data["photo"] = existing_data.get("photo", user_data["photo"])
+                if not password_hash and "passwordHash" in existing_data:
+                    user_data["passwordHash"] = existing_data["passwordHash"]
             doc_ref.set(user_data)
             _user_info_cache[user_id] = user_data
             return user_data
@@ -174,6 +179,8 @@ def create_or_update_user(user_id, email, full_name, photo_url=None):
         user_data["createdAt"] = existing_data.get("createdAt", user_data["createdAt"])
         if not photo_url:
             user_data["photo"] = existing_data.get("photo", user_data["photo"])
+        if not password_hash and "passwordHash" in existing_data:
+            user_data["passwordHash"] = existing_data["passwordHash"]
     db["users"][user_id] = user_data
     _save_local_db(db)
     _user_info_cache[user_id] = user_data

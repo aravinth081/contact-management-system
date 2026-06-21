@@ -8,6 +8,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from firebase_config import FIREBASE_ENABLED
 import database
 
+# Firebase is client-enabled only if Firebase backend is enabled and client keys (e.g. API Key) are configured
+CLIENT_FIREBASE_ENABLED = FIREBASE_ENABLED and bool(os.environ.get("FIREBASE_API_KEY"))
+
 # ReportLab imports for PDF Generation
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, KeepTogether
@@ -68,13 +71,13 @@ def inject_user():
 def login_page():
     if 'user_id' in session:
         return redirect(url_for('dashboard_page'))
-    return render_template('login.html', firebase_enabled=FIREBASE_ENABLED)
+    return render_template('login.html', firebase_enabled=CLIENT_FIREBASE_ENABLED)
 
 @app.route('/register')
 def register_page():
     if 'user_id' in session:
         return redirect(url_for('dashboard_page'))
-    return render_template('register.html', firebase_enabled=FIREBASE_ENABLED)
+    return render_template('register.html', firebase_enabled=CLIENT_FIREBASE_ENABLED)
 
 @app.route('/')
 @login_required
@@ -84,24 +87,24 @@ def index():
 @app.route('/dashboard')
 @login_required
 def dashboard_page():
-    return render_template('dashboard.html', active_page='dashboard', firebase_enabled=FIREBASE_ENABLED)
+    return render_template('dashboard.html', active_page='dashboard', firebase_enabled=CLIENT_FIREBASE_ENABLED)
 
 @app.route('/contacts')
 @login_required
 def contacts_page():
-    return render_template('contacts.html', active_page='contacts', firebase_enabled=FIREBASE_ENABLED)
+    return render_template('contacts.html', active_page='contacts', firebase_enabled=CLIENT_FIREBASE_ENABLED)
 
 @app.route('/groups')
 @login_required
 def groups_page():
-    return render_template('groups.html', active_page='groups', firebase_enabled=FIREBASE_ENABLED)
+    return render_template('groups.html', active_page='groups', firebase_enabled=CLIENT_FIREBASE_ENABLED)
 
 
 
 @app.route('/profile')
 @login_required
 def profile_page():
-    return render_template('profile.html', active_page='profile', firebase_enabled=FIREBASE_ENABLED)
+    return render_template('profile.html', active_page='profile', firebase_enabled=CLIENT_FIREBASE_ENABLED)
 
 
 # ==========================================
@@ -177,6 +180,18 @@ def api_register_local():
         # Check if user already exists
         existing_user = database.get_user_by_email(email)
         if existing_user:
+            if not existing_user.get('passwordHash'):
+                # Convert Firebase-registered user to local user by setting passwordHash
+                password_hash = generate_password_hash(password)
+                user_data = database.create_or_update_user(
+                    existing_user['userId'], 
+                    email, 
+                    full_name or existing_user.get('fullName'), 
+                    photo_url=existing_user.get('photo'), 
+                    password_hash=password_hash
+                )
+                database.create_notification(existing_user['userId'], "System", f"Welcome back, {full_name}! Account upgraded to local sign-in.")
+                return jsonify({"success": True, "user": user_data})
             return jsonify({"error": "An account with this email address already exists."}), 400
             
         # Create user with password hash
@@ -453,14 +468,22 @@ def api_update_profile():
     if photo_file:
         photo_url = database.save_file(photo_file, photo_file.filename, 'profiles')
         
+    # Check if local user (has passwordHash) or Firebase is disabled
+    existing_user = database.get_user(user_id)
+    is_local = existing_user and ('passwordHash' in existing_user)
+
+    password_hash = None
+    if password and (is_local or not FIREBASE_ENABLED):
+        password_hash = generate_password_hash(password)
+
     # Save base info
-    user_data = database.create_or_update_user(user_id, email, full_name, photo_url=photo_url)
+    user_data = database.create_or_update_user(user_id, email, full_name, photo_url=photo_url, password_hash=password_hash)
     session['name'] = full_name
     session['email'] = email
     session['photo'] = user_data.get('photo', '/static/images/default-avatar.svg')
     
-    # Handle password update
-    if password:
+    # Handle password update for Firebase users
+    if password and not is_local and FIREBASE_ENABLED:
         try:
             from firebase_admin import auth
             auth.update_user(user_id, password=password)
