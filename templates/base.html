@@ -32,7 +32,25 @@
         <!-- Sidebar Navigation -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand" style="padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--sidebar-border);">
-                <img src="/static/images/logo.png" alt="Contact Management System" style="height: 48px; max-width: 180px; object-fit: contain;">
+                <div class="custom-logo">
+                    <div class="custom-logo-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoCloudGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="var(--logo-grad-start)" />
+                                    <stop offset="100%" stop-color="var(--logo-grad-end)" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M18 10h-.7a7 7 0 0 0-13.8 2.1 4 4 0 0 0-.5 7.9H18a5 5 0 0 0 0-10z" fill="url(#logoCloudGrad)" />
+                            <circle cx="11.5" cy="13.5" r="2.2" fill="#ffffff" />
+                            <path d="M8 18.5c0-1.8 1.5-3 3.5-3s3.5 1.2 3.5 3" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" fill="none" />
+                        </svg>
+                    </div>
+                    <div class="custom-logo-details">
+                        <span class="custom-logo-title">Contact<span>Pro</span></span>
+                        <span class="custom-logo-subtitle">CRM Workspace</span>
+                    </div>
+                </div>
                 <button class="mobile-close-btn" id="mobileCloseBtn">
                     <i data-lucide="x"></i>
                 </button>

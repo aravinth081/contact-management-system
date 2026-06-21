@@ -40,6 +40,10 @@
     --radius-md: 12px;
     --radius-lg: 16px;
     --radius-full: 9999px;
+    
+    /* Logo Brand Variables */
+    --logo-grad-start: #3b82f6;
+    --logo-grad-end: #1d4ed8;
 }
 
 /* Dark Theme Overrides */
@@ -59,6 +63,10 @@ html[data-theme="dark"] {
     --shadow-md: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    
+    /* Logo Brand Variables - Dark Mode */
+    --logo-grad-start: #60a5fa;
+    --logo-grad-end: #2563eb;
 }
 
 html {
@@ -569,7 +577,11 @@ button, .btn {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
 }
 
@@ -615,6 +627,11 @@ html[data-theme="dark"] .auth-body::after {
     padding: 16px;
     position: relative;
     z-index: 1;
+    max-height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .auth-card {
@@ -3151,4 +3168,56 @@ html[data-theme="dark"] .loading-overlay {
 }
 .chart-empty-state i {
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+}
+
+/* Custom Pure CSS/SVG Logo Branding */
+.custom-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+    text-decoration: none;
+}
+
+.custom-logo-icon {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    background: transparent;
+}
+
+.custom-logo-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.custom-logo-details {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.custom-logo-title {
+    font-weight: 800;
+    font-size: 17px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    transition: var(--transition);
+}
+
+.custom-logo-title span {
+    color: var(--primary);
+}
+
+.custom-logo-subtitle {
+    font-weight: 600;
+    font-size: 9px;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    opacity: 0.9;
 }

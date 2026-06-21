@@ -270,6 +270,7 @@ function initAuthHandlers() {
     const registerForm = document.getElementById('registerForm');
     const forgotForm = document.getElementById('forgotForm');
     const alertBox = document.getElementById('authAlert');
+    let isLocalAuthMode = !window.firebaseEnabled;
 
     const showAlert = (msg, type = 'error') => {
         if (!alertBox) return;
@@ -288,10 +289,14 @@ function initAuthHandlers() {
                     firebaseAuthInstance = firebase.auth();
                     console.log("Firebase client sdk initialized.");
                 } else {
-                    console.error("Firebase enabled on backend but client keys missing.");
+                    console.error("Firebase enabled on backend but client keys missing. Using local database auth fallback.");
+                    isLocalAuthMode = true;
                 }
             })
-            .catch(err => console.error("Could not fetch configurations", err));
+            .catch(err => {
+                console.error("Could not fetch configurations", err);
+                isLocalAuthMode = true;
+            });
     }
 
     // Submit LOGIN form
@@ -328,6 +333,34 @@ function initAuthHandlers() {
                         }
                     } else {
                         showAlert(sessionData.error || "Session mapping failed.");
+                    }
+                } catch (err) {
+                    showAlert(err.message);
+                } finally {
+                    toggleLoader('loginBtn', false, 'Sign In');
+                }
+            } else if (isLocalAuthMode) {
+                // Local DB Auth Flow
+                try {
+                    const res = await fetch('/api/auth/login-local', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const sessionData = await res.json();
+                    
+                    if (res.ok && sessionData.success) {
+                        const overlay = document.getElementById('loadingOverlay');
+                        if (overlay) {
+                            overlay.classList.add('active');
+                            setTimeout(() => {
+                                window.location.href = '/dashboard';
+                            }, 1000);
+                        } else {
+                            window.location.href = '/dashboard';
+                        }
+                    } else {
+                        showAlert(sessionData.error || "Invalid credentials or login failed.");
                     }
                 } catch (err) {
                     showAlert(err.message);
@@ -408,6 +441,36 @@ function initAuthHandlers() {
                 } finally {
                     toggleLoader('registerBtn', false, 'Create Account');
                 }
+            } else if (isLocalAuthMode) {
+                // Local DB Register Flow
+                try {
+                    const res = await fetch('/api/auth/register-local', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ fullName, email, password })
+                    });
+                    const registerData = await res.json();
+                    
+                    if (res.ok && registerData.success) {
+                        if (loadingText) loadingText.textContent = "Account created successfully!";
+                        
+                        setTimeout(() => {
+                            if (overlay) overlay.classList.remove('active');
+                            showAlert("Account created successfully! Redirecting to login page...", "success");
+                            setTimeout(() => {
+                                window.location.href = '/login';
+                            }, 1000);
+                        }, 1200);
+                    } else {
+                        if (overlay) overlay.classList.remove('active');
+                        showAlert(registerData.error || "Failed to create local account.");
+                    }
+                } catch (err) {
+                    if (overlay) overlay.classList.remove('active');
+                    showAlert(err.message);
+                } finally {
+                    toggleLoader('registerBtn', false, 'Create Account');
+                }
             } else {
                 if (overlay) overlay.classList.remove('active');
                 showAlert("Firebase initialization is pending. Please wait or reload.");
@@ -427,6 +490,24 @@ function initAuthHandlers() {
                 try {
                     await firebaseAuthInstance.sendPasswordResetEmail(email);
                     showAlert("Instructions sent! Check your inbox email.", 'success');
+                } catch (err) {
+                    showAlert(err.message);
+                } finally {
+                    toggleLoader('forgotBtn', false, 'Send Reset Instructions');
+                }
+            } else if (isLocalAuthMode) {
+                try {
+                    const res = await fetch('/api/auth/forgot-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, isLocal: true })
+                    });
+                    const resData = await res.json();
+                    if (res.ok && resData.success) {
+                        showAlert(resData.message || "Simulated password reset instructions sent successfully.", 'success');
+                    } else {
+                        showAlert(resData.error || "Could not process request.");
+                    }
                 } catch (err) {
                     showAlert(err.message);
                 } finally {

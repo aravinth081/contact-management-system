@@ -159,9 +159,81 @@ def api_login():
         logger.error(f"Token verification error: {e}")
         return jsonify({"error": "Invalid token"}), 401
 
+@app.route('/api/auth/register-local', methods=['POST'])
+def api_register_local():
+    import uuid
+    data = request.get_json() or {}
+    email = data.get('email', '').strip().lower()
+    password = data.get('password', '')
+    full_name = data.get('fullName', '').strip()
+    
+    if not email or not password or not full_name:
+        return jsonify({"error": "Missing required fields"}), 400
+        
+    if len(password) < 8:
+        return jsonify({"error": "Password must be at least 8 characters"}), 400
+        
+    try:
+        # Check if user already exists
+        existing_user = database.get_user_by_email(email)
+        if existing_user:
+            return jsonify({"error": "An account with this email address already exists."}), 400
+            
+        # Create user with password hash
+        uid = uuid.uuid4().hex
+        password_hash = generate_password_hash(password)
+        user_data = database.create_local_user(uid, email, full_name, password_hash)
+        
+        # Log notification
+        database.create_notification(uid, "System", f"Welcome to Contact Management System, {full_name}!")
+        
+        return jsonify({"success": True, "user": user_data})
+    except Exception as e:
+        logger.error(f"Local registration error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/auth/login-local', methods=['POST'])
+def api_login_local():
+    data = request.get_json() or {}
+    email = data.get('email', '').strip().lower()
+    password = data.get('password', '')
+    
+    if not email or not password:
+        return jsonify({"error": "Missing email or password"}), 400
+        
+    try:
+        user_data = database.get_user_by_email(email)
+        if not user_data:
+            return jsonify({"error": "Invalid email or password"}), 401
+            
+        password_hash = user_data.get('passwordHash')
+        if not password_hash:
+            return jsonify({"error": "This account is registered via Firebase. Please sign in using standard Firebase Auth."}), 400
+            
+        if not check_password_hash(password_hash, password):
+            return jsonify({"error": "Invalid email or password"}), 401
+            
+        session['user_id'] = user_data['userId']
+        session['email'] = user_data['email']
+        session['name'] = user_data['fullName']
+        session['photo'] = user_data.get('photo', '/static/images/default-avatar.svg')
+        
+        return jsonify({"success": True, "user": user_data})
+    except Exception as e:
+        logger.error(f"Local login error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/auth/forgot-password', methods=['POST'])
 def api_forgot_password():
+    data = request.get_json() or {}
+    email = data.get('email', '').strip().lower()
+    is_local = data.get('isLocal', False)
+    if is_local:
+        return jsonify({"success": True, "message": f"Password reset instructions for {email} have been simulated."})
     return jsonify({"info": "Forgot password flow is managed client-side using Firebase SDK."})
+
 
 @app.route('/logout')
 def logout():
