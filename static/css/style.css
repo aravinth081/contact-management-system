@@ -2954,6 +2954,74 @@ html[data-theme="dark"] .auth-body::after {
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    .header-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .header-actions .primary-btn, 
+    .header-actions .secondary-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Auth Views Mobile Optimization */
+    .auth-container {
+        padding: 12px;
+    }
+
+    .auth-card {
+        padding: 24px 20px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-row .form-group {
+        margin-bottom: 0;
+    }
+
+    /* Profile / Settings Tab Mobile View */
+    .profile-main-panel {
+        padding: 16px;
+    }
+
+    .settings-tabs {
+        flex-direction: column;
+        gap: 8px;
+        border-bottom: none;
+    }
+
+    .settings-tab {
+        width: 100%;
+        text-align: left;
+        padding: 8px 16px;
+        border-bottom: none;
+        border-left: 3px solid transparent;
+        border-radius: var(--radius-sm);
+        margin-bottom: 0;
+    }
+
+    .settings-tab.active {
+        border-left-color: var(--primary);
+        background-color: var(--primary-glow);
+        color: var(--primary);
+    }
+
+    .profile-avatar-row {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 16px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -2969,7 +3037,12 @@ html[data-theme="dark"] .auth-body::after {
     .view-toggle-grp {
         display: none;
     }
+
+    .auth-card {
+        padding: 20px 16px;
+    }
 }
+
 
 /* ==========================================================================
    PREMIUM FULLSCREEN LOADING OVERLAY
