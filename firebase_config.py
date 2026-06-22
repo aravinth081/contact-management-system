@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 FIREBASE_ENABLED = False
 db_client = None
 storage_bucket = None
+cred = None
 
 # Check for service account key file in root
 SERVICE_ACCOUNT_KEY_PATH = os.path.join(os.path.dirname(__file__), 'serviceAccountKey.json')
@@ -60,12 +61,15 @@ try:
         FIREBASE_ENABLED = True
         logger.info("Firebase services successfully initialized.")
     else:
-        raise RuntimeError(
-            "Firebase Configuration Error: 'serviceAccountKey.json' is required in the root directory for database connectivity! "
-            "Please generate and download the private key from the Firebase Console (Project Settings > Service Accounts) and place it in the root folder."
+        logger.warning(
+            "Firebase Configuration Error: 'serviceAccountKey.json' not found in root, and FIREBASE_SERVICE_ACCOUNT_JSON env var is missing. "
+            "Firebase is disabled. Local JSON database fallback mode will be active."
         )
+        FIREBASE_ENABLED = False
 except Exception as e:
-    raise RuntimeError(
+    logger.error(
         f"Firebase Initialization Error: {e}. "
-        "Please ensure 'serviceAccountKey.json' is a valid, correct private key certificate JSON file."
+        "Firebase is disabled. Local JSON database fallback mode will be active."
     )
+    FIREBASE_ENABLED = False
+
